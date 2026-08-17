@@ -73,8 +73,8 @@ new class extends Component
         $this->canDownloadXML = false;
 
         $this->calculated = $calculator->calculate($this->docData['conceptos']);
-         $document = $generator->generate($this->docData, $this->calculated);
-         $outputDirectory = storage_path('app/private/cfdi');
+        $document = $generator->generate($this->docData, $this->calculated);
+        $outputDirectory = storage_path('app/private/cfdi');
 
         if(!is_dir($outputDirectory)){
             mkdir($outputDirectory, 0755, true);
@@ -110,21 +110,20 @@ new class extends Component
 
 <div>
     <form wire:submit="calculate">
-        <div class="flex flex-col w-full font-body-md text-on-surface">
-            <div class="flex items-center justify-between mb-xl pb-md bg-surface border-b-2 border-surface-container shadow-sm p-lg rounded-xl relative overflow-hidden">
-
-            <div class="flex items-center gap-md z-10">
-            <div class="w-12 h-12 bg-primary-container rounded-xl flex items-center justify-center shadow-md">
-            <span class="material-symbols-outlined text-[28px] text-on-primary-container">post_add</span>
+        <div class="flex flex-col w-full font-body-md text-on-surface relative">
+            <div class="flex items-center justify-between mb-xl pb-md bg-surface border-b-2 border-surface-container shadow-sm p-lg rounded-xl overflow-hidden">
+                <div class="flex items-center gap-md z-10">
+                    <div class="w-12 h-12 bg-primary-container rounded-xl flex items-center justify-center shadow-md">
+                        <span class="material-symbols-outlined text-[28px] text-on-primary-container">post_add</span>
+                    </div>
+                    <div>
+                        <h1 class="font-headline-lg text-headline-lg text-on-surface">Nuevo CFDI 4.0</h1>
+                        <p class="font-body-sm text-body-sm text-on-surface-variant mt-xs">Facturación Electrónica SAT</p>
+                    </div>
+                </div>
             </div>
-            <div>
-            <h1 class="font-headline-lg text-headline-lg text-on-surface">Nuevo CFDI 4.0</h1>
-            <p class="font-body-sm text-body-sm text-on-surface-variant mt-xs">Facturación Electrónica SAT</p>
-            </div>
-            </div>
-            </div>
-                    <div class="grid grid-cols-12 gap-lg relative">
-                    <div class="col-span-12 lg:col-span-8 flex flex-col gap-lg">
+            <div class="grid grid-cols-12 gap-lg relative">
+                <div class="col-span-12 lg:col-span-8 flex flex-col gap-lg">
                     <div class="bg-surface shadow-md rounded-xl p-xl relative overflow-hidden">
                             <div class="flex items-center justify-between mb-lg">
                                 <h2 class="font-headline-md text-headline-md text-on-surface flex items-center gap-sm">
@@ -324,10 +323,6 @@ new class extends Component
                                 <span class="material-symbols-outlined text-primary text-[20px]">list_alt</span>
                                 Conceptos
                             </h2>
-                            <button class="bg-secondary-container text-on-secondary-container px-md py-sm rounded-lg font-label-md text-label-md hover:bg-secondary transition-colors hover:text-on-secondary shadow-sm flex items-center gap-xs">
-                                <span class="material-symbols-outlined text-[18px]">add</span>
-                                Agregar Concepto
-                            </button>
                         </div>
                         <div class="overflow-x-auto">
                             <table class="w-full text-left border-collapse">
@@ -338,6 +333,9 @@ new class extends Component
                                         <th class="p-sm font-label-md text-label-md text-on-surface-variant uppercase">Descripción</th>
                                         <th class="p-sm font-label-md text-label-md text-on-surface-variant uppercase text-right w-32">Valor U.</th>
                                         <th class="p-sm font-label-md text-label-md text-on-surface-variant uppercase text-right w-32">IVA</th>
+                                        <th class="p-sm font-label-md text-label-md text-on-surface-variant uppercase text-right w-32">Importe</th>
+                                        <th class="p-sm font-label-md text-label-md text-on-surface-variant uppercase text-right w-32">Traslado</th>
+
                                         <th class="p-sm w-10"></th>
                                     </tr>
                                 </thead>
@@ -350,8 +348,10 @@ new class extends Component
                                                 <span class="w-full bg-transparent text-[10px] focus:ring-1 focus:ring-primary rounded p-xs font-light line-clamp-2" >{{$concepto['descripcion']}}</span>
                                                 <div class="text-[10px] text-on-surface-variant mt-xs font-mono-md">ClaveProdServ: {{$concepto['claveProdServ']}}</div>
                                             </td>
-                                            <td class="p-sm text-right"><span class="w-full bg-transparent focus:ring-1 focus:ring-primary rounded p-xs text-right font-mono-md">{{$concepto['valorUnitario']}}</span> </td>
+                                            <td class="p-sm text-right"><span class="w-full bg-transparent focus:ring-1 focus:ring-primary rounded p-xs text-right font-mono-md">{{money($concepto['valorUnitario'])}}</span> </td>
                                             <td class="p-sm text-right font-mono-md font-semibold text-primary">{{$concepto['iva']}}</td>
+                                            <td class="p-sm text-right font-mono-md font-semibold text-primary">{{ isset($calculated['conceptos']) ? money($calculated['conceptos'][$key]['importe']) : 'N/A'}}</td>
+                                            <td class="p-sm text-right font-mono-md font-semibold text-primary">{{ isset($calculated['conceptos']) ? money($calculated['conceptos'][$key]['importeIva']) : 'N/A'}}</td>
                                             <td class="p-sm text-center">
                                                 <button class="text-outline hover:text-error transition-colors opacity-0 group-hover:opacity-100">
                                                     <span class="material-symbols-outlined text-[18px]">delete</span>
@@ -359,19 +359,25 @@ new class extends Component
                                             </td>
                                         </tr>
                                     @empty
-                                    <tr class="flex justify-center items-center">
-                                        Sin datos
-                                    </tr>
-
+                                        <tr class="flex justify-center items-center">
+                                            Sin datos
+                                        </tr>
                                     @endforelse
-
-                                    <tr class="bg-surface-container-lowest/50">
-                                        <td class="p-sm pl-xl" colspan="6">
-                                            <div class="flex gap-lg text-[11px] text-on-surface-variant border-l-2 border-surface-container-high pl-md">
-                                                <span>Base: ${{array_sum(array_column($docData['conceptos'], 'valorUnitario'))}}</span>
-                                            </div>
-                                        </td>
-                                    </tr>
+                                    @if (isset($calculated['impuestos']))
+                                        @foreach ($calculated['impuestos'] as $impuesto)
+                                            <tr class="bg-surface-container-lowest/50">
+                                                <td class="p-sm pl-xl" colspan="6">
+                                                    <div class="flex gap-lg text-[11px] text-on-surface-variant border-l-2 border-surface-container-high pl-md">
+                                                        <span>Base: {{ money($impuesto['base'])}}</span>
+                                                        <span>Impuesto: <strong class="text-on-surface">IVA ({{$impuesto['impuesto']}})</strong></span>
+                                                        <span>Tipo Factor: <strong class="text-on-surface">{{$impuesto['tipoFactor']}}</strong></span>
+                                                        <span>Tasa: <strong class="text-on-surface">{{$impuesto['tasaOCuota']}}</strong></span>
+                                                        <span class="ml-auto font-mono-md">Traslado: <strong class="text-primary">{{money($impuesto['importe'])}}</strong></span>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    @endif
                                 </tbody>
                             </table>
                         </div>
@@ -383,23 +389,44 @@ new class extends Component
                                 <div class="flex flex-col gap-sm font-body-md">
                                     <div class="flex justify-between items-center">
                                         <span class="text-on-primary/80">Subtotal</span>
-                                        <span class="font-mono-md font-semibold">{{isset($calculated['subtotal'])?$calculated['subtotal']:'--.--'}}</span>
+                                        <span class="font-mono-md font-semibold">
+                                            {{
+                                                isset($calculated['subtotal'])?
+                                                money($calculated['subtotal']) :
+                                                '--.--'
+                                            }}</span>
                                     </div>
                                     <div class="my-sm border-t border-on-primary/20 border-dashed pt-sm flex flex-col gap-xs text-[13px]">
                                         <div class="flex justify-between items-center text-on-primary/90">
-                                        <span>IVA Trasladado (16%)</span>
-                                        <span class="font-mono-md">{{isset($calculated['totalImpuestosTrasladados'])?$calculated['totalImpuestosTrasladados']:'--.--'}}</span>
+                                            <span>IVA Trasladado (16%)</span>
+                                            <span class="font-mono-md">
+                                                {{
+                                                    isset($calculated['totalImpuestosTrasladados'])?
+                                                    money($calculated['totalImpuestosTrasladados']):
+                                                    '--.--'
+                                                }}
+                                            </span>
                                         </div>
                                     </div>
                                     <div class="mt-md pt-md border-t border-on-primary/30 flex justify-between items-end">
                                         <span class="font-headline-md text-headline-md">Total</span>
-                                        <span class="font-display text-display tracking-tight">{{isset($calculated['total'])?$calculated['total']:'---.--'}}</span>
+                                        <span class="font-display text-display tracking-tight">
+                                            {{
+                                                isset($calculated['total'])?
+                                                money($calculated['total']):
+                                                '---.--'
+                                            }}
+                                        </span>
                                     </div>
-                                    <div class="text-right text-[11px] text-on-primary/60 uppercase mt-xs tracking-wider">MXN</div>
+                                    <div class="text-right text-[11px] text-on-primary/60 uppercase mt-xs tracking-wider">
+                                     {{ $docData['comprobante']['moneda']??'' }}
+                                    </div>
                                 </div>
 
                                 <div class="mt-xl flex flex-col gap-md">
-                                    <button type="submit" class="w-full bg-tertiary text-on-tertiary py-md rounded-lg font-label-md text-label-md shadow-md hover:bg-tertiary-container transition-colors flex justify-center items-center gap-sm">
+                                    <button
+                                    type="submit"
+                                    class="w-full bg-tertiary text-on-tertiary py-md rounded-lg font-label-md text-label-md shadow-md hover:bg-tertiary-container transition-colors flex justify-center items-center gap-sm">
                                         <span class="material-symbols-outlined text-[20px]">calculate</span>
                                             Calcular
                                     </button>
@@ -419,7 +446,7 @@ new class extends Component
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                    </div>
             </div>
         </div>
     </form>
@@ -518,4 +545,19 @@ new class extends Component
 
     </div>
 </flux:modal>
+<div
+    wire:loading.flex
+    wire:target="calculate,validateXML,downloadXML"
+    class="fixed inset-0 z-[9999] items-center justify-center bg-black/40 backdrop-blur-sm"
+>
+    <div class="rounded-xl bg-white p-6 shadow-xl dark:bg-zinc-900">
+        <div class="flex items-center gap-3">
+            <flux:icon.loading class="size-6" />
+
+            <flux:text>
+                Procesando solicitud...
+            </flux:text>
+        </div>
+    </div>
+</div>
 </div>
