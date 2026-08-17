@@ -7,7 +7,6 @@ RUN apt-get update && apt-get install -y \
     libzip-dev \
     libicu-dev \
     && docker-php-ext-install \
-        pdo_mysql \
         bcmath \
         intl \
         zip \
@@ -19,6 +18,8 @@ WORKDIR /var/www/html
 
 COPY . .
 
+RUN touch database/database.sqlite
+
 RUN composer install \
     --no-interaction \
     --prefer-dist \
@@ -27,6 +28,7 @@ RUN composer install \
 
 RUN chown -R www-data:www-data \
     storage \
-    bootstrap/cache
+    bootstrap/cache \
+    database
 
 CMD php artisan serve --host=0.0.0.0 --port=${PORT}
